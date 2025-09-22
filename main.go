@@ -25,13 +25,10 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
-		// 🔹 Orígenes permitidos (podes ajustar según tu frontend)
 		AllowedOrigins: []string{"https://example.com", "http://localhost:3000"},
 
-		// 🔹 Métodos que acepta tu API
 		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 
-		// 🔹 Headers que acepta
 		AllowedHeaders: []string{
 			"Accept",
 			"Authorization",
@@ -39,15 +36,17 @@ func main() {
 			"X-CSRF-Token",
 		},
 
-		// 🔹 Headers expuestos al cliente (ej: tokens en headers)
 		ExposedHeaders: []string{"Link"},
 
-		// 🔹 Permitir cookies/autenticación (true si usas sesiones o JWT en cookies)
 		AllowCredentials: true,
 
-		// 🔹 Cache del preflight (OPTIONS)
 		MaxAge: 300, // 5 minutos
 	}))
+
+	v1Router := chi.NewRouter()
+	v1Router.HandleFunc("/healthz", handlerReadiness)
+
+	router.Mount("/v1", v1Router)
 
 	srv := &http.Server{
 		Handler: router,
