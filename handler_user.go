@@ -12,16 +12,16 @@ import (
 
 func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Name  string `json:name`
-		Email string `json:email`
+		Name  string `json:"name"`
+		Email string `json:"email"`
 	}
 
-	decode := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 
-	err := decode.Decode(&params)
+	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
 	}
 
@@ -34,9 +34,9 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		},
 	})
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error Creating the user: %v", err))
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error creating user: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 200, user)
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
