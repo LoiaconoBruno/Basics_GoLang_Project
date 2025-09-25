@@ -6,7 +6,6 @@ coursegolang
 *.dylib
 
 *.test
-
 *.out
 coverage.*
 *.coverprofile
