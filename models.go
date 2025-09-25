@@ -16,14 +16,10 @@ type User struct {
 }
 
 func databaseUserToUser(dbUser database.User) User {
-	createdAt := time.Time{}
-	if dbUser.CreatedAt.Valid {
-		createdAt = dbUser.CreatedAt.Time
-	}
 	return User{
 		ID:        dbUser.ID,
 		Name:      dbUser.Name,
 		Email:     dbUser.Email,
-		CreatedAt: createdAt,
+		CreatedAt: dbUser.Created,
 	}
 }

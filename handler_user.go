@@ -1,11 +1,9 @@
 package main // O el paquete correspondiente
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"coursegolang/internal/database"
 
@@ -36,10 +34,6 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		ID:    uuid.New(),
 		Name:  params.Name,
 		Email: params.Email,
-		CreatedAt: sql.NullTime{
-			Time:  time.Now().UTC(),
-			Valid: true,
-		},
 	})
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
