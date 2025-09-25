@@ -9,21 +9,19 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"user-id"`
-	Name      string    `json:"user-name"`
-	Email     string    `json:"user-email"`
-	CreatedAt time.Time `json:"user-created-at"`
+	ID      uuid.UUID `json:"user-id"`
+	Name    string    `json:"user-name"`
+	Email   string    `json:"user-email"`
+	Created time.Time `json:"user-created"`
+	APIKey  string    `json:"api_key"`
 }
 
 func databaseUserToUser(dbUser database.User) User {
-	createdAt := time.Time{}
-	if dbUser.CreatedAt.Valid {
-		createdAt = dbUser.CreatedAt.Time
-	}
 	return User{
-		ID:        dbUser.ID,
-		Name:      dbUser.Name,
-		Email:     dbUser.Email,
-		CreatedAt: createdAt,
+		ID:      dbUser.ID,
+		Name:    dbUser.Name,
+		Email:   dbUser.Email,
+		Created: dbUser.Created,
+		APIKey:  dbUser.ApiKey,
 	}
 }

@@ -1,12 +1,11 @@
 package main // O el paquete correspondiente
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
+	"coursegolang/internal/auth"
 	"coursegolang/internal/database"
 
 	"github.com/google/uuid"
@@ -36,11 +35,44 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		ID:    uuid.New(),
 		Name:  params.Name,
 		Email: params.Email,
-		CreatedAt: sql.NullTime{
-			Time:  time.Now().UTC(),
-			Valid: true,
-		},
 	})
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505": // Unique violation
+				if pqErr.Constraint == "users_email_key" {
+					respondWithError(w, http.StatusConflict, "Email already exists")
+				} else {
+					respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Database error: %v", err))
+				}
+			default:
+				respondWithError(
+					w,
+					http.StatusInternalServerError,
+					fmt.Sprintf("Database error: %v", err),
+				)
+			}
+			return
+		}
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			fmt.Sprintf("Error creating user: %v", err),
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
+}
+
+func (apiCfg *apiConfig) handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, 403, fmt.Sprintf("Auth Erorr: %v", err))
+		return
+	}
+
+	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code {
