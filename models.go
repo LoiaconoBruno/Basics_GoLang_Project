@@ -9,17 +9,17 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"user-id"`
-	Name      string    `json:"user-name"`
-	Email     string    `json:"user-email"`
-	CreatedAt time.Time `json:"user-created-at"`
+	ID      uuid.UUID `json:"user-id"`
+	Name    string    `json:"user-name"`
+	Email   string    `json:"user-email"`
+	Created time.Time `json:"user-created-at"`
 }
 
 func databaseUserToUser(dbUser database.User) User {
 	return User{
-		ID:        dbUser.ID,
-		Name:      dbUser.Name,
-		Email:     dbUser.Email,
-		CreatedAt: dbUser.Created,
+		ID:      dbUser.ID,
+		Name:    dbUser.Name,
+		Email:   dbUser.Email,
+		Created: dbUser.Created,
 	}
 }
