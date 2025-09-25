@@ -8,6 +8,8 @@ package database
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -18,7 +20,7 @@ RETURNING id, name, email, created_at
 `
 
 type CreateUserParams struct {
-	ID        int32
+	ID        uuid.UUID
 	Name      string
 	Email     string
 	CreatedAt sql.NullTime
