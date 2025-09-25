@@ -6,10 +6,12 @@ package database
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        int32
+	ID        uuid.UUID
 	Name      string
 	Email     string
 	CreatedAt sql.NullTime
