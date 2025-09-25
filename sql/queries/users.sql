@@ -2,8 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 INSERT INTO users (
   name, email, created_at, api_key
-) VALUES ($1, $2, $3,
+) VALUES ($1, $2, NOW(),
   encode(gen_random_bytes(32), 'hex')
 )
 RETURNING *;
-
