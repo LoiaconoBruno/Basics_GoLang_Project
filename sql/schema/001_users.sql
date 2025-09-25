@@ -7,7 +7,5 @@ CREATE TABLE users (
     email TEXT UNIQUE NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT now()
 );
-
-
 -- +goose Down
 DROP TABLE users;
