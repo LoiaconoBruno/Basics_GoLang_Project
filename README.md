@@ -31,6 +31,7 @@ API RESTful desarrollada en **Go (Golang)** para gestión de usuarios con autent
 ## 🔹 Instalación
 
 1. Clonar el repositorio:
-```bash
-git clone https://github.com/tuusuario/go-auth-api.git
-cd go-auth-api
+```
+git clone https://github.com/LoiaconoBruno/Basics_GoLang_Project.git
+cd Basics_GoLang_Project
+```
