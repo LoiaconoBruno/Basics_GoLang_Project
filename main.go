@@ -74,6 +74,7 @@ func main() {
 	v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUserByAPIKey))
 	v1Router.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
+	v1Router.Get("/feeds", apiCfg.handlerGetFeed)
 	router.Mount("/v1", v1Router)
 
 	// 🔹 Configuración del servidor HTTP
