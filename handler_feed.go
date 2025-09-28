@@ -70,3 +70,20 @@ func (apiCfg *apiConfig) handlerCreateFeed(
 	// Respuesta con feed creado
 	respondWithJSON(w, http.StatusCreated, databaseFeedToFeed(feed)) // ✅ 201 Created
 }
+
+func (apiCfg *apiConfig) handlerGetFeed(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	feeds, err := apiCfg.DB.GetFeeds(r.Context())
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			fmt.Sprintf("an Error has occured, %v", err),
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, databaseFeedsToFeeds(feeds))
+}
