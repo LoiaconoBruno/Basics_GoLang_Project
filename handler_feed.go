@@ -21,33 +21,34 @@ func (apiCfg *apiConfig) handlerCreateFeed(
 		Url  string `json:"url"`
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
-	err := decoder.Decode(&params)
-	if err != nil {
+	// Decodificar body
+	var params parameters
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
 	}
 
+	// Validar campos
 	if params.Name == "" || params.Url == "" {
-		respondWithError(w, http.StatusBadRequest, "Name and url are required")
+		respondWithError(w, http.StatusBadRequest, "Name and URL are required")
 		return
 	}
 
+	// Crear feed en DB
 	feed, err := apiCfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		IDFeeds: uuid.New(),
 		Name:    params.Name,
-		Url:     "",
+		Url:     params.Url,
 		UserID:  user.ID,
 	})
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code {
-			case "23505": // Unique violation
-				if pqErr.Constraint == "users_email_key" {
-					respondWithError(w, http.StatusConflict, "Email already exists")
+			case "23505": // unique violation
+				if pqErr.Constraint == "feeds_url_key" { // ✅ constraint correcta
+					respondWithError(w, http.StatusConflict, "Feed URL already exists")
 				} else {
-					respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Database error: %v", err))
+					respondWithError(w, http.StatusConflict, "Feed already exists")
 				}
 			default:
 				respondWithError(
@@ -61,10 +62,11 @@ func (apiCfg *apiConfig) handlerCreateFeed(
 		respondWithError(
 			w,
 			http.StatusInternalServerError,
-			fmt.Sprintf("Error creating user: %v", err),
+			fmt.Sprintf("Error creating feed: %v", err), // ✅ mensaje corregido
 		)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
+	// Respuesta con feed creado
+	respondWithJSON(w, http.StatusCreated, databaseFeedToFeed(feed)) // ✅ 201 Created
 }
