@@ -16,37 +16,34 @@ func (apiCfg *apiConfig) handlerFeedFollow(
 	r *http.Request,
 	user database.User,
 ) {
+	// 📌 Estructura esperada en el body
 	type parameters struct {
 		FeedID uuid.UUID `json:"feed_id"`
 	}
+
 	var params parameters
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error parsing JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid JSON: %v", err))
 		return
 	}
 
-	// Validar campos
-	if params.Name == "" || params.Url == "" {
-		respondWithError(w, http.StatusBadRequest, "Name and URL are required")
+	// 📌 Validación de datos
+	if params.FeedID == uuid.Nil {
+		respondWithError(w, http.StatusBadRequest, "feed_id is required")
 		return
 	}
 
-	// Crear feed en DB
-	feed, err := apiCfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
-		IDFeeds: uuid.New(),
-		Name:    params.Name,
-		Url:     params.Url,
-		UserID:  user.ID,
+	// 📌 Insertar en DB
+	feedFollow, err := apiCfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		IDFeedsFollow: uuid.New(),
+		UserID:        user.ID,
+		FeedID:        params.FeedID,
 	})
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code {
 			case "23505": // unique violation
-				if pqErr.Constraint == "feeds_url_key" { // ✅ constraint correcta
-					respondWithError(w, http.StatusConflict, "Feed URL already exists")
-				} else {
-					respondWithError(w, http.StatusConflict, "Feed already exists")
-				}
+				respondWithError(w, http.StatusConflict, "You are already following this feed")
 			default:
 				respondWithError(
 					w,
@@ -56,14 +53,15 @@ func (apiCfg *apiConfig) handlerFeedFollow(
 			}
 			return
 		}
+
 		respondWithError(
 			w,
 			http.StatusInternalServerError,
-			fmt.Sprintf("Error creating feed: %v", err), // ✅ mensaje corregido
+			fmt.Sprintf("Error following feed: %v", err),
 		)
 		return
 	}
 
-	// Respuesta con feed creado
-	respondWithJSON(w, http.StatusCreated, databaseFeedToFeed(feed)) // ✅ 201 Created
+	// 📌 Éxito
+	respondWithJSON(w, http.StatusCreated, databaseFeedFollowToFeedFollow(feedFollow))
 }
